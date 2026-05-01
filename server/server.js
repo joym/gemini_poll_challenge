@@ -1,8 +1,9 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
 const app = require('./app');
 const aiService = require('./services/aiService');
 
-// ✅ Cloud Run compatible port
+// ✅ Cloud Run–compatible port (FIXED)
 const PORT = process.env.PORT || 8080;
 
 console.log("🚀 Starting server...");
