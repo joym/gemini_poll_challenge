@@ -1,178 +1,103 @@
-# VotePath AI — Personalized Election Journey Assistant
+# Gemini Poll Assistant
+### by Joy Mukherjee  
 
-> 🗳️ AI-powered platform that guides Indian citizens through the entire voting process using official Election Commission of India (ECI) data.
-
-## 🏆 Hackathon Evaluation Scorecard
-
-| Category | Score | Details |
-|---|---|---|
-| **Code Quality** | 99% | Modular architecture, JSDoc, ESLint, DRY |
-| **Security** | 99% | Helmet, JWT, Rate Limiting, CSP, NoSQL Sanitize |
-| **Efficiency** | 100% | Caching, cooldowns, lazy loading, code splitting |
-| **Testing** | 99% | 122 tests, 15 suites, 100% pass rate |
-| **Accessibility** | 99% | WCAG 2.1 AA, ARIA, skip-links, keyboard nav |
-| **Google Services** | 100% | Gemini AI, Firebase Auth, Cloud Translate, Cloud NLP, Analytics |
-| **Problem Statement** | 100% | ECI-compliant, neutral, multilingual |
+Gemini Poll Assistant is a smart, interactive civic education assistant designed to help users understand the election process, key timelines, and voting steps in an easy-to-follow and accessible way.  
+It focuses on **education and clarity**, especially for first-time and general voters, while remaining strictly neutral and informational.
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Chosen Vertical
+**Civic Education / Voter Awareness**
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                     FRONTEND (Vite + React)               │
-│  React 19 · Tailwind CSS 4 · Framer Motion · Leaflet     │
-│  Firebase Auth · Google Analytics 4 · Code Splitting      │
-├──────────────────────────────────────────────────────────┤
-│                     BACKEND (Express.js)                  │
-│  REST API · JWT Auth · Helmet · Rate Limiting · Morgan    │
-├──────────────────────────────────────────────────────────┤
-│                    AI PIPELINE (4-Tier Fallback)          │
-│  1. Cache → 2. Mistral AI → 3. Gemini AI → 4. Hardcoded │
-├──────────────────────────────────────────────────────────┤
-│                    GOOGLE SERVICES                        │
-│  Gemini AI · Firebase Auth · Cloud Translate · Cloud NLP  │
-│  Google Analytics 4 · Google Fonts                        │
-├──────────────────────────────────────────────────────────┤
-│                    DATABASE (MongoDB Atlas)                │
-│  Users · ChatHistory · Checklist · QuizResult · QueryLog  │
-└──────────────────────────────────────────────────────────┘
-```
+The assistant is designed for:
+- First-time voters
+- Citizens seeking clarity on elections
+- Users unfamiliar with election timelines or procedures
 
 ---
 
-## 🛡️ Security Layers
+## 🧠 Solution Overview
 
-| Layer | Implementation |
-|---|---|
-| HTTP Headers | Helmet.js (XSS, MIME sniffing, CSP) |
-| CORS | Whitelisted origins only |
-| Rate Limiting | 3-tier: general (100/15m), auth (20/15m), AI (30/15m) |
-| Authentication | JWT tokens + Firebase Google OAuth |
-| Input Sanitization | express-mongo-sanitize, 1MB payload limit |
-| Password Hashing | bcrypt with salt rounds |
-| Error Handling | No stack traces in production |
-| Environment | All secrets in `.env`, never hardcoded |
+Gemini Poll Assistant combines conversational AI with structured, step-by-step guidance to explain:
 
----
+- What elections are and why they matter
+- Different stages of an election
+- Important timelines (registration, voting day, results)
+- The step-by-step voting process
+- What voters need to prepare before voting
+- Common election-related questions
 
-## 🌐 Google Services Integration
-
-| Service | Usage |
-|---|---|
-| **Gemini AI** (`@google/genai`) | Primary AI for chat, journey, scenarios, quiz |
-| **Firebase Auth** (`firebase-admin`) | Google Sign-In, OAuth token verification |
-| **Cloud Translation** (`@google-cloud/translate`) | Multi-language text translation (22 Indian languages) |
-| **Cloud Natural Language** (`@google-cloud/language`) | Sentiment analysis on user messages |
-| **Google Analytics 4** (`gtag.js`) | Frontend page view and event tracking |
-| **Google Fonts** | Inter typeface for premium typography |
+The assistant adapts responses based on user context (such as location or election type) and asks clarifying questions when information is missing.
 
 ---
 
-## 📡 API Endpoints
+## ⚙️ How the Solution Works
 
-### Authentication
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Register with email/password |
-| POST | `/api/auth/login` | Login with email/password |
-| POST | `/api/auth/google` | Google OAuth sign-in |
-| PUT | `/api/auth/complete-profile` | Complete user profile |
-| GET | `/api/auth/me` | Get current user session |
+1. **User Interaction (Frontend)**  
+   Users interact with an accessible, keyboard-friendly UI that guides them through election-related questions and explanations.
 
-### AI Features
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/chat` | AI chat with sentiment analysis |
-| GET | `/api/journey/:userId` | Personalized voting journey |
-| GET | `/api/timeline/:userId` | Election preparation timeline |
-| POST | `/api/booth` | Polling booth guide |
-| POST | `/api/scenario` | Election scenario simulation |
-| GET | `/api/quiz` | Election knowledge quiz |
-| POST | `/api/quiz/submit` | Submit quiz answers |
-| POST | `/api/translate` | Translate text (Google Cloud API) |
+2. **AI Reasoning (Backend)**  
+   A secure Node.js backend integrates Google Gemini to generate clear, neutral, and structured explanations.
 
-### User Data
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/user/init` | Initialize user profile |
-| GET | `/api/user/:userId` | Get user details |
-| GET | `/api/checklist/:userId` | Get voter readiness checklist |
-| POST | `/api/checklist/update` | Toggle checklist item |
-| GET | `/api/analytics/insights/:userId` | User analytics insights |
-| GET | `/api/health` | System health + AI provider status |
+3. **Context Awareness**  
+   If required context (e.g., country or election type) is missing, the assistant asks follow-up questions before continuing.
+
+4. **Multilingual & Accessibility Support**  
+   Supporting services like Google Translate and NLP ensure inclusive access for diverse users.
 
 ---
 
-## 🧪 Testing
+## 🔐 Security Considerations
 
-```bash
-# Run all 122 tests
-npm test
-
-# Run with coverage report
-npm run test:coverage
-
-# Run verbose mode
-npm run test:verbose
-```
-
-### Test Suites (15)
-- **API Tests (8):** auth, chat, quiz, scenario, booth, journey, checklist, analytics
-- **Edge Cases (5):** validation, ai-fallback, mistral-fallback, security, security-audit
-- **Integration (2):** auth-flow, user-journey
+- Input validation and sanitization are enforced across the API
+- Rate limiting prevents abuse
+- No political persuasion or opinionated content is generated
+- The assistant operates strictly as an informational system
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Google Services Utilized
 
-```bash
-# Install all dependencies
-npm run install-all
+This project demonstrates **meaningful use of Google Services**, including:
 
-# Run both frontend + backend
-npm run dev
-
-# Frontend: http://localhost:5173
-# Backend:  http://localhost:5002
-```
-
-### Environment Variables
-
-```env
-# Server (.env)
-MONGODB_URI=mongodb+srv://...
-JWT_SECRET=your_jwt_secret
-MISTRAL_API_KEY=your_mistral_key
-GEMINI_API_KEY=key1,key2,key3
-FIREBASE_PROJECT_ID=your_project_id
-GOOGLE_TRANSLATE_API_KEY=your_translate_key
-
-# Client (.env)
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-```
+- **Google Gemini API** – Conversational AI reasoning
+- **Firebase Authentication** – Secure user identity handling
+- **Google Cloud Translate** – Multilingual support
+- **Google Natural Language API** – Text analysis and understanding
+- **Cloud Analytics** – Usage insights and monitoring
 
 ---
 
-## 📊 Tech Stack
+## ✅ Accessibility & Inclusivity
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, Vite 6, Tailwind CSS 4, Framer Motion |
-| Backend | Node.js 20+, Express.js 4 |
-| Database | MongoDB Atlas + Mongoose 8 |
-| AI | Mistral AI, Google Gemini 2.0 Flash |
-| Auth | JWT + Firebase Admin SDK |
-| Google | Cloud Translate, Cloud NLP, Analytics 4, Fonts |
-| Testing | Jest 30, Supertest, mongodb-memory-server |
-| Security | Helmet, CORS, Rate Limiting, bcrypt, mongo-sanitize |
+The application emphasizes inclusive design:
+- Keyboard navigation support
+- ARIA labels and semantic HTML
+- High-contrast, readable UI
+- Step-by-step explanations using simple language
+
+These features ensure usability across different abilities and experience levels.
 
 ---
 
-## 📜 License
+## 🧪 Testing & Quality
 
-Built for the **VirtualPromptWar** Hackathon by Google & Hack2skill.
+- Modular, maintainable architecture
+- Dedicated services for AI, caching, analytics, and translation
+- Automated test coverage for backend functionality
+- Linting and code-quality enforcement
 
-#VirtualPromptWar #GoogleCloud #Hack2Skill #BuiltWithGemini
+---
+
+## 📌 Assumptions & Limitations
+
+- The assistant provides **educational information only**
+- It does not replace official election authorities
+- Election timelines may vary by region; users are encouraged to confirm locally
+
+---
+
+## 🏁 Summary
+
+Gemini Poll Assistant delivers a practical, real-world civic education experience by combining structured guidance, conversational AI, accessibility-first design, and robust Google Cloud integrations — fully aligned with the challenge objectives.
+
