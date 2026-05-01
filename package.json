@@ -2,11 +2,9 @@
   "name": "votepath-ai-server",
   "version": "1.0.0",
   "description": "VotePath AI Backend Server",
-  "main": "server/server.js",
+  "main": "index.js",
   "scripts": {
-    "build": "npm install",
-    "dev": "node server/server.js",
-    "start": "node server/server.js"
+    "start": "node index.js"
   },
   "engines": {
     "node": ">=20"
