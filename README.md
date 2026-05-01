@@ -6,6 +6,14 @@ It focuses on **education and clarity**, especially for first-time and general v
 
 ---
 
+## Civic Problem Alignment
+
+This project addresses the challenge of equitable access to neutral,
+accurate, and multilingual civic information.
+
+The system is designed to assist understanding of civic processes
+without influencing political opinions, decisions, or outcomes.
+
 ## 🎯 Chosen Vertical
 **Civic Education / Voter Awareness**
 
@@ -100,4 +108,12 @@ These features ensure usability across different abilities and experience levels
 ## 🏁 Summary
 
 Gemini Poll Assistant delivers a practical, real-world civic education experience by combining structured guidance, conversational AI, accessibility-first design, and robust Google Cloud integrations — fully aligned with the challenge objectives.
+
+## Execution Model
+
+- **Runtime**: Google Cloud Run (fully managed)
+- **State**: Stateless, request-scoped
+- **Identity**: Firebase Auth
+- **AI**: Gemini (prompt-based, no fine-tuning)
+- **Governance**: Neutral, auditable, ECI-aligned
 

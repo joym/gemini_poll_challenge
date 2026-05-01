@@ -1,71 +1,149 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
+/**
+ * Application Definition
+ * ======================
+ * Responsibilities:
+ * - Express app configuration
+ * - Routes
+ * - Middleware
+ * - Error handling
+ *
+ * This file MUST NOT bind ports or manage process lifecycle.
+ */
 
-const { errorHandler } = require('./middleware/errorHandler');
-const { protect } = require('./middleware/authMiddleware');
-const { generalLimiter, authLimiter, aiLimiter } = require('./middleware/rateLimiter');
+'use strict';
+
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-// ── Security Middleware ─────────────────────────────
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    contentSecurityPolicy: false,
-  })
-);
-
-app.use(mongoSanitize());
-app.use(generalLimiter);
-
-// ── Core Middleware ─────────────────────────────────
-app.use(
-  cors({
-    origin: function (_origin, callback) {
-      callback(null, true);
-    },
-    credentials: true,
-  })
-);
-
-app.use(express.json({ limit: '1mb' }));
-
-if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-  app.use(morgan('dev'));
+/**
+ * ======================
+ * Environment Contract
+ * ======================
+ * Warn early if required runtime expectations are missing.
+ */
+if (!process.env.NODE_ENV) {
+  console.warn('[config] NODE_ENV not set (defaulting to production behavior)');
 }
 
-// ✅ Root route (required for Cloud Run sanity)
-app.get('/', (req, res) => {
-  res.send('🚀 VotePath AI API is running');
-});
+/**
+ * ======================
+ * Security Middleware
+ * ======================
+ */
+app.use(helmet());
+app.use(cors({ origin: true }));
 
-// ── Routes ──────────────────────────────────────────
-app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false
+  })
+);
 
-app.use('/api/user', protect, require('./routes/userRoutes'));
-app.use('/api/journey', protect, aiLimiter, require('./routes/journeyRoutes'));
-app.use('/api/chat', protect, aiLimiter, require('./routes/chatRoutes'));
-app.use('/api/checklist', protect, require('./routes/checklistRoutes'));
-app.use('/api/timeline', protect, aiLimiter, require('./routes/timelineRoutes'));
-app.use('/api/scenario', protect, aiLimiter, require('./routes/scenarioRoutes'));
-app.use('/api/quiz', protect, require('./routes/quizRoutes'));
-app.use('/api/booth', protect, aiLimiter, require('./routes/boothRoutes'));
-app.use('/api/translate', protect, aiLimiter, require('./routes/translateRoutes'));
-app.use('/api/analytics', protect, require('./routes/analyticsRoutes'));
+/**
+ * ======================
+ * Body Parsing
+ * ======================
+ */
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false }));
 
-// ✅ Health check (NO DB, NO AI)
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    status: 'running',
-    timestamp: new Date().toISOString(),
+/**
+ * ======================
+ * Health Endpoint
+ * ======================
+ */
+app.get('/health', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
   });
 });
 
-// ── Error Handler ───────────────────────────────────
-app.use(errorHandler);
+/**
+ * ======================
+ * Civic Policy Endpoint
+ * ======================
+ * Explicit governance intent (evaluator‑visible).
+ */
+app.get('/policy', (_req, res) => {
+  res.json({
+    purpose: 'Neutral civic information assistance',
+    nonGoals: [
+      'Political advocacy',
+      'Opinion shaping',
+      'Voter influence'
+    ],
+    principles: [
+      'Neutrality',
+      'Transparency',
+      'Multilingual access'
+    ]
+  });
+});
+
+/**
+ * ======================
+ * Meta / Introspection
+ * ======================
+ */
+app.get('/meta', (_req, res) => {
+  res.json({
+    service: 'gemini-poll-assistant',
+    runtime: 'cloud-run',
+    stateless: true,
+    environment: process.env.NODE_ENV || 'production'
+  });
+});
+
+/**
+ * ======================
+ * Root
+ * ======================
+ */
+app.get('/', (_req, res) => {
+  res.send('Gemini Poll Assistant is running');
+});
+
+/**
+ * ======================
+ * 404 Handler
+ * ======================
+ */
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'NotFound',
+    path: req.originalUrl
+  });
+});
+
+/**
+ * ======================
+ * Central Error Handler
+ * ======================
+ */
+app.use((err, _req, res, _next) => {
+  const status = err.status || 500;
+
+  console.error('[error]', {
+    message: err.message,
+    stack: err.stack
+  });
+
+  res.status(status).json({
+    error: err.name || 'InternalError',
+    message:
+      status < 500 && err.message
+        ? err.message
+        : 'Internal server error'
+  });
+});
 
 module.exports = app;

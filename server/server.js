@@ -1,27 +1,72 @@
-require('dotenv').config({
-  path: require('path').resolve(__dirname, '../.env')
-});
+/**
+ * Server Entry Point
+ * ==================
+ * Responsibilities:
+ * - Process lifecycle management
+ * - Port binding
+ * - Graceful shutdown
+ *
+ * This file intentionally contains NO application logic.
+ */
 
+'use strict';
+
+const http = require('http');
 const app = require('./app');
 
-// ✅ Cloud Run–compatible PORT
-const PORT = process.env.PORT || 8080;
+const PORT = Number(process.env.PORT) || 8080;
+let server;
 
-console.log('🚀 Starting server...');
+/**
+ * Start the HTTP server
+ */
+function start() {
+  server = http.createServer(app);
 
-// ✅ IMPORTANT:
-// Start listening FIRST.
-// Do NOT import or call anything that can throw
-// before the server binds to the port.
-app.listen(PORT, '0.0.0.0', async () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  server.listen(PORT, () => {
+    console.log(`[server] listening on port ${PORT}`);
+  });
+}
 
-  // ✅ Post-start checks (safe, non-fatal)
-  try {
-    const aiService = require('./services/aiService');
-    const status = await aiService.getStatus();
-    console.log('🤖 AI Status:', status);
-  } catch (err) {
-    console.warn('⚠️ AI status check failed:', err.message);
+/**
+ * Graceful shutdown handler
+ */
+function shutdown(signal) {
+  console.log(`[server] received ${signal}, shutting down gracefully`);
+
+  if (!server) {
+    process.exit(0);
   }
+
+  server.close(() => {
+    console.log('[server] all connections closed');
+    process.exit(0);
+  });
+
+  // Hard stop if shutdown hangs
+  setTimeout(() => {
+    console.error('[server] forced shutdown');
+    process.exit(1);
+  }, 10000).unref();
+}
+
+/**
+ * Process‑level safety hooks
+ */
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+process.on('uncaughtException', err => {
+  console.error('[fatal] uncaughtException', err);
+  shutdown('uncaughtException');
 });
+
+process.on('unhandledRejection', err => {
+  console.error('[fatal] unhandledRejection', err);
+  shutdown('unhandledRejection');
+});
+
+/**
+ * Bootstrap
+ */
+start();
