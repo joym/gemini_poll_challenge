@@ -10,33 +10,39 @@ const { generalLimiter, authLimiter, aiLimiter } = require('./middleware/rateLim
 
 const app = express();
 
-// ── Security Middleware ────────────────────
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
-  contentSecurityPolicy: false,
-}));
+// ── Security Middleware ─────────────────────────────
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false,
+  })
+);
+
 app.use(mongoSanitize());
 app.use(generalLimiter);
 
-// ── Core Middleware ─────────────────────────
-app.use(cors({
-  origin: function (origin, callback) {
-    callback(null, true);
-  },
-  credentials: true,
-}));
+// ── Core Middleware ─────────────────────────────────
+app.use(
+  cors({
+    origin: function (_origin, callback) {
+      callback(null, true);
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: '1mb' }));
 
 if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// ✅ ROOT ROUTE (VERY IMPORTANT FOR CLOUD RUN)
+// ✅ Root route (required for Cloud Run sanity)
 app.get('/', (req, res) => {
   res.send('🚀 VotePath AI API is running');
 });
 
-// ── Routes ─────────────────────────
+// ── Routes ──────────────────────────────────────────
 app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
 
 app.use('/api/user', protect, require('./routes/userRoutes'));
@@ -50,7 +56,7 @@ app.use('/api/booth', protect, aiLimiter, require('./routes/boothRoutes'));
 app.use('/api/translate', protect, aiLimiter, require('./routes/translateRoutes'));
 app.use('/api/analytics', protect, require('./routes/analyticsRoutes'));
 
-// ✅ BASIC HEALTH CHECK (NO AI / DB)
+// ✅ Health check (NO DB, NO AI)
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -59,7 +65,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handler
+// ── Error Handler ───────────────────────────────────
 app.use(errorHandler);
 
 module.exports = app;
