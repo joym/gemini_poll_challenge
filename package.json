@@ -9,7 +9,7 @@
     "start": "node server/server.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   },
   "dependencies": {
     "@google-cloud/language": "^7.2.1",
