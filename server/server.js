@@ -1,18 +1,24 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+require('dotenv').config({
+  path: require('path').resolve(__dirname, '../.env')
+});
 
 const app = require('./app');
-const aiService = require('./services/aiService');
 
-// ✅ Cloud Run–compatible port (FIXED)
+// ✅ Cloud Run–compatible PORT
 const PORT = process.env.PORT || 8080;
 
-console.log("🚀 Starting server...");
+console.log('🚀 Starting server...');
 
+// ✅ IMPORTANT:
+// Start listening FIRST.
+// Do NOT import or call anything that can throw
+// before the server binds to the port.
 app.listen(PORT, '0.0.0.0', async () => {
   console.log(`✅ Server running on port ${PORT}`);
 
-  // ✅ Safe AI status check (won’t crash if API fails)
+  // ✅ Post-start checks (safe, non-fatal)
   try {
+    const aiService = require('./services/aiService');
     const status = await aiService.getStatus();
     console.log('🤖 AI Status:', status);
   } catch (err) {
