@@ -1,16 +1,21 @@
-// ── Firebase Cloud Functions Entry Point ──
+// ─────────────────────────────────────────────
+// Firebase Cloud Functions Entry Point ONLY
+// ─────────────────────────────────────────────
+
 const { onRequest } = require('firebase-functions/v2/https');
 const { setGlobalOptions } = require('firebase-functions/v2');
 
-// Set global options for all functions
+// Firebase configuration
 setGlobalOptions({
-  region: 'asia-south1', // Mumbai region (closest to India)
+  region: 'asia-south1',
   timeoutSeconds: 60,
   memory: '256MiB',
 });
 
-// Import the Express app
-const app = require('./app');
+// Import Express app
+const app = require('./server/app');
 
-// Export as a Cloud Function
+// Firebase export
 exports.api = onRequest(app);
+
+// ❗ DO NOT call app.listen() here
