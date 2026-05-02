@@ -1,0 +1,10 @@
+# apphosting.yaml
+runtime: nodejs20
+env: standard
+
+instance_class: F1
+
+handlers:
+  - url: /.*
+    secure: always
+    script: auto

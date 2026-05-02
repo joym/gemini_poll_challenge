@@ -1,0 +1,1 @@
+Firebase Studio index directory
